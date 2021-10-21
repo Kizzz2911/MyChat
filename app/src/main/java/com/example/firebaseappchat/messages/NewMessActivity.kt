@@ -73,7 +73,7 @@ class NewMessActivity : AppCompatActivity() {
 
     //Check User Login
     private fun verifyUserLoggedIn() {
-        val uid = FirebaseAuth.getInstance()?.uid
+        val uid = FirebaseAuth.getInstance().uid
         if (uid == null) {
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -91,10 +91,7 @@ class UItem(val user: SignUpActivity.getUser): Item<GroupieViewHolder>(){
     }
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-        if(user == null){
-            Log.d("Error Message","User Name = ${user.name}")
-            return
-        }else if (user.Urlphoto.toString().isEmpty() ){
+        if (user.Urlphoto.isEmpty() ){
             val ImgDefault ="https://th.bing.com/th/id/R.502a73beb3f9263ca076457d525087c6?" +
                     "rik=OP8RShVgw6uFhQ&riu=http%3a%2f%2fdvdn247.net%2fwp-content%2fuploads%2f2020%2f07%2" +
                     "favatar-mac-dinh-1.png&ehk=NSFqDdL3jl9cMF3B9A4%2bzgaZX3sddpix%2bp7R%2bmTZHsQ%3d&risl=" +
