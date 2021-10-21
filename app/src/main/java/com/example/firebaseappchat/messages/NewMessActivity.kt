@@ -20,7 +20,7 @@ import com.xwray.groupie.*
 import kotlinx.android.synthetic.main.user_row.view.*
 
 class NewMessActivity : AppCompatActivity() {
-    private lateinit var binding : ActivityNewMessBinding
+    private lateinit var binding: ActivityNewMessBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,9 +33,11 @@ class NewMessActivity : AppCompatActivity() {
 
         LayUser()
     }
-    companion object{
+
+    companion object {
         var USER_KEY = "USER_KEY"
     }
+
     // Get user name and images then show in user_row
     private fun LayUser() {
         val ref = FirebaseDatabase.getInstance().getReference("/user")
@@ -44,31 +46,33 @@ class NewMessActivity : AppCompatActivity() {
                 val adapter = GroupAdapter<GroupieViewHolder>()
                 snapshot.children.forEach() {
                     val user = it.getValue(SignUpActivity.getUser::class.java)
-
-                    if (user != null) {
-                        adapter.add(UItem(user))
+                    val userdangdung = FirebaseAuth.getInstance().currentUser
+                    if (userdangdung != null) {
+                        if (user != null) {
+                            if (!userdangdung.uid.equals(user.uid)) {
+                                adapter.add(UItem(user))
+                            }
+                        }
                     }
                 }
                 adapter.setOnItemClickListener { item, view ->
-
                     val userItem = item as UItem
 
-                    val intent =Intent(view.context,ChatLogActivity::class.java)
+                    val intent = Intent(view.context, ChatLogActivity::class.java)
                     //intent.putExtra(USER_KEY,userItem.user.name)
-                    intent.putExtra(USER_KEY,userItem.user)
+                    intent.putExtra(USER_KEY, userItem.user)
                     startActivity(intent)
                     finish()
                 }
-                binding.recyclerviewnewmess.adapter  = adapter
+                binding.recyclerviewnewmess.adapter = adapter
             }
 
             override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
+                Log.d("new lỗi",error.message)
             }
 
         })
     }
-
 
 
     //Check User Login
@@ -83,23 +87,21 @@ class NewMessActivity : AppCompatActivity() {
 }
 
 
-
 //Connect user_row to recycler view
-class UItem(val user: SignUpActivity.getUser): Item<GroupieViewHolder>(){
+class UItem(val user: SignUpActivity.getUser) : Item<GroupieViewHolder>() {
     override fun getLayout(): Int {
         return R.layout.user_row
     }
 
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-        if (user.Urlphoto.isEmpty() ){
-            val ImgDefault ="https://th.bing.com/th/id/R.502a73beb3f9263ca076457d525087c6?" +
+        if (user.Urlphoto.isEmpty()) {
+            val ImgDefault = "https://th.bing.com/th/id/R.502a73beb3f9263ca076457d525087c6?" +
                     "rik=OP8RShVgw6uFhQ&riu=http%3a%2f%2fdvdn247.net%2fwp-content%2fuploads%2f2020%2f07%2" +
                     "favatar-mac-dinh-1.png&ehk=NSFqDdL3jl9cMF3B9A4%2bzgaZX3sddpix%2bp7R%2bmTZHsQ%3d&risl=" +
                     "&pid=ImgRaw&r=0"
-            viewHolder.itemView.txtUserName.text = user.name+"(Need Update Profile)"
+            viewHolder.itemView.txtUserName.text = user.name + "(Need Update Profile)"
             Picasso.get().load(ImgDefault).into(viewHolder.itemView.iVUser)
-        }
-        else{
+        } else {
             viewHolder.itemView.txtUserName.text = user.name
 
             Picasso.get().load(user.Urlphoto).into(viewHolder.itemView.iVUser)

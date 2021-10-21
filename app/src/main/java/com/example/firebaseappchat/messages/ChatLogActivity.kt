@@ -22,10 +22,11 @@ import kotlinx.android.synthetic.main.chat_to_row.view.*
 
 class ChatLogActivity : AppCompatActivity() {
 
-    companion object{
+    companion object {
         val TAG = "chat log"
     }
-    val adapter =GroupAdapter<GroupieViewHolder>()
+
+    val adapter = GroupAdapter<GroupieViewHolder>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat_log)
@@ -34,7 +35,7 @@ class ChatLogActivity : AppCompatActivity() {
         //val username = intent.getStringExtra(NewMessActivity.USER_KEY)
         //supportActionBar?.title = username
 
-        recyclerview_chat_log.adapter =adapter
+        recyclerview_chat_log.adapter = adapter
 
         val user = intent.getParcelableExtra<SignUpActivity.getUser>(NewMessActivity.USER_KEY)
         if (user != null) {
@@ -42,27 +43,27 @@ class ChatLogActivity : AppCompatActivity() {
         }
 
 
-
         //testdatatn()
         nhantinnhan()
 
-        gui_button_chat_log.setOnClickListener{
-        Log.d(TAG,"attempt to send message...")
-        performsendMessage()
+        gui_button_chat_log.setOnClickListener {
+            Log.d(TAG, "attempt to send message...")
+            performsendMessage()
         }
     }
-    private fun nhantinnhan(){
+
+    private fun nhantinnhan() {
         var ref = FirebaseDatabase.getInstance().getReference("/messages")
-        ref.addChildEventListener(object :ChildEventListener{
+        ref.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-               val chatMessage = snapshot.getValue(ChatMessage::class.java)
+                val chatMessage = snapshot.getValue(ChatMessage::class.java)
                 chatMessage?.text?.let { Log.d(TAG, it) }
                 if (chatMessage != null) {
 
 
-                    if (chatMessage.formId== FirebaseAuth.getInstance().uid)
+                    if (chatMessage.formId == FirebaseAuth.getInstance().uid)
                         adapter.add(ChatFromItem(chatMessage.text))
-                    else{
+                    else {
                         adapter.add(ChatToItem(chatMessage.text))
                     }
                 }
@@ -89,9 +90,7 @@ class ChatLogActivity : AppCompatActivity() {
     }
 
 
-
-
-    private fun performsendMessage(){
+    private fun performsendMessage() {
         // gui du lieu vao firebase
 
         editText_chat_log.text.toString()
@@ -105,17 +104,19 @@ class ChatLogActivity : AppCompatActivity() {
 
         val toId = user?.uid
 
-        if(fromId == null ) return
+        if (fromId == null) return
 
         val reference = FirebaseDatabase.getInstance().getReference("/messages").push()
 
         val chatMessage = toId?.let {
-            ChatMessage(reference.key!!,text,fromId!!,
-                it,System.currentTimeMillis()/1000)
+            ChatMessage(
+                reference.key!!, text, fromId!!,
+                it, System.currentTimeMillis() / 1000
+            )
         }
         reference.setValue(chatMessage)
             .addOnSuccessListener {
-                Log.d(TAG,"luu thong tin: ${reference.key}")
+                Log.d(TAG, "luu thong tin: ${reference.key}")
             }
     }
 
@@ -131,20 +132,24 @@ class ChatLogActivity : AppCompatActivity() {
         recyclerview_chat_log.adapter = adapter
     }
 }
-class ChatFromItem (val text:String):Item<GroupieViewHolder>(){
+
+class ChatFromItem(val text: String) : Item<GroupieViewHolder>() {
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
-        viewHolder.itemView.textviewfrom_chat_from_row.text =text
+        viewHolder.itemView.textviewfrom_chat_from_row.text = text
     }
+
     override fun getLayout(): Int {
         return R.layout.chat_from_row
     }
 }
-class ChatToItem (val text:String):Item<GroupieViewHolder>(){
+
+class ChatToItem(val text: String) : Item<GroupieViewHolder>() {
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         viewHolder.itemView.textviewfrom_chat_to_row.text = text
 
 
     }
+
     override fun getLayout(): Int {
         return R.layout.chat_to_row
     }
