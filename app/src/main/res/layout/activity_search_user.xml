@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/colorPrimary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp"
+        android:layout_centerVertical="true">
+
+        <EditText
+            android:id="@+id/TxtSearch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginLeft="48dp"
+            android:layout_marginRight="48dp"
+            android:background="@drawable/edit_text_background_search"
+            android:drawableRight="@android:drawable/ic_search_category_default"
+            android:hint="Search Here...."
+            android:singleLine="true"
+            android:textAlignment="viewStart"
+            android:textStyle="bold"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/ListSearch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    </LinearLayout>
+
+
+</RelativeLayout>
