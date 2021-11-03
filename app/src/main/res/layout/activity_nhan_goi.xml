@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_meeting_invention"
-    tools:context="VideoCall.Outcoming">
+    android:background="@drawable/background_meeting_invention">
 
     <LinearLayout
         android:id="@+id/linearLayout3"
@@ -29,13 +27,13 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/img_userIncomingCall"
+            android:id="@+id/img_nhan"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_gravity="center" />
 
         <TextView
-            android:id="@+id/txtUsername_incomingCall"
+            android:id="@+id/txtUsername_nhan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
@@ -64,18 +62,16 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/btn_accpetcall"
+                android:id="@+id/btn_Nghe"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:layout_marginRight="70dp"
-                android:background="@drawable/background_btncall_yes"
                 android:contentDescription="@string/app_name"
+                android:layout_marginRight="100dp"
                 android:padding="8dp"
-                android:src="@drawable/ic_baseline_call_end_24"
-                android:visibility="gone" />
+                android:src="@drawable/ic_baseline_call_end_24" />
 
             <ImageView
-                android:id="@+id/btn_rejectcall"
+                android:id="@+id/btn_Tuchoi"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:background="@drawable/background_btncall_no"

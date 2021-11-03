@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -21,6 +22,7 @@ import com.example.firebaseappchat.registerlogin.SignUpActivity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
@@ -41,9 +43,7 @@ class Outcoming : AppCompatActivity() {
 
     private lateinit var ocuRef: DatabaseReference
 
-    private lateinit var reciverUid: String
-
-    private lateinit var senderUid: String
+    private lateinit var NguoiGoi: FirebaseUser
 
     private lateinit var callingUid: String
 
@@ -56,15 +56,13 @@ class Outcoming : AppCompatActivity() {
         setContentView(R.layout.activity_outcoming)
         toUser = intent.getParcelableExtra(VideoChatActivity.USER_KEY)
 
-        reciverUid = toUser?.uid.toString()
-        senderUid = FirebaseAuth.getInstance().currentUser?.uid.toString()
+        NguoiGoi = FirebaseAuth.getInstance().currentUser!!
 
-        username= findViewById(R.id.txtUsername_incomingCall)
+        username = findViewById(R.id.txtUsername_incomingCall)
         avatar = findViewById(R.id.img_userIncomingCall)
         btnCancell = findViewById(R.id.btn_rejectcall)
-        btnAccept = findViewById(R.id.btn_accpetcall)
 
-        ocuRef = FirebaseDatabase.getInstance().getReference("/user-call/$senderUid/$reciverUid")
+        ocuRef = FirebaseDatabase.getInstance().getReference("user-call")
         mediaPlayer = MediaPlayer.create(this, R.raw.ringing)
 
 
@@ -75,140 +73,55 @@ class Outcoming : AppCompatActivity() {
             Picasso.get().load(toUser!!.Urlphoto).into(avatar)
         }
 
-        btnCancell.setOnClickListener(){
+        btnCancell.setOnClickListener() {
             mediaPlayer.stop()
             checker = "clicked"
             cancelCalling()
-        }
-
-        btnAccept.setOnClickListener {
-            mediaPlayer.stop()
-
-            val callPickUp: HashMap<String, Any> = HashMap()
-
-            callPickUp["picked"] = "picked"
-
-            ocuRef.child(senderUid).child("ringing").updateChildren(callPickUp)
-                .addOnCompleteListener {
-                    startActivity(Intent(this@Outcoming,IncomingCall::class.java))
-                }
         }
     }
 
     override fun onStart() {
         super.onStart()
 
+        val name = NguoiGoi.displayName.toString()
+        val uid = NguoiGoi.uid
         mediaPlayer.start()
-
-        val callingInfo: HashMap<String, Any> = HashMap()
-
-        callingInfo["calling"] = reciverUid
-        ocuRef.setValue(callingInfo)
-
+        val callingInfo = mapOf<String, String>(
+            "name" to name,
+            "uid" to uid
+        )
         //Call Event
-        ocuRef.addListenerForSingleValueEvent(object : ValueEventListener{
+        ocuRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if(checker != "clicked" && !snapshot.hasChild("calling") && !snapshot.hasChild("ringing")){
-
-                        ocuRef.child(senderUid).child("calling")
-                        .updateChildren(callingInfo as Map<String, Any>)
-                        .addOnCompleteListener {
-                                if (it.isSuccessful) {
-                                    val ringingInfo: HashMap<String, Any> = HashMap()
-
-                                    ringingInfo["ringing"] = senderUid
-
-                                    ocuRef.child(reciverUid).child("ringing")
-                                        .updateChildren(ringingInfo as Map<String, Any>)
-                                }
+                ocuRef.child(NguoiGoi.uid).child("Calling").child("uidNghe").setValue(toUser?.uid.toString())
+                ocuRef.child(NguoiGoi.uid)
+                    .updateChildren(callingInfo)
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val ringingInfo = mapOf<String, String>(
+                                "name" to toUser?.name.toString(),
+                                "uid" to toUser?.uid.toString()
+                            )
+                            ocuRef.child(toUser!!.uid).child("Ringing").child("uidCall").setValue(NguoiGoi.uid)
+                            ocuRef.child(toUser!!.uid)
+                                .updateChildren(ringingInfo)
                         }
-                }
+                    }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-
-        })
-
-        //Cancal button
-        ocuRef.addValueEventListener(object : ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.child(senderUid).hasChild("ringing") && !snapshot.child(senderUid).hasChild("calling")){
-                    btnAccept.visibility = View.VISIBLE
-                }
-                if(snapshot.child(reciverUid).child("ringing").hasChild("picked")){
-                    mediaPlayer.stop()
-                    startActivity(Intent(this@Outcoming,IncomingCall::class.java))
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-
+            override fun onCancelled(error: DatabaseError) {}
         })
     }
 
+
     private fun cancelCalling() {
-        //Sender
-        ocuRef.child(senderUid)
-            .child("calling")
-            .addListenerForSingleValueEvent(object : ValueEventListener{
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.exists() && snapshot.hasChild("calling")) {
-                        callingUid = snapshot.child("calling").value.toString()
-
-                        ocuRef.child(callingUid)
-                            .child("ringing")
-                            .removeValue()
-                            .addOnCompleteListener {
-                            if (it.isSuccessful){
-                                ocuRef.child(senderUid).child("calling").removeValue().addOnCompleteListener {
-                                startActivity(Intent(this@Outcoming, IncomingCall::class.java))
-                                finish()
-                            }
-                        }
+        mediaPlayer.stop()
+        ocuRef.child(NguoiGoi.uid).child("Calling").child(toUser?.uid.toString()).removeValue()
+            .addOnCompleteListener {
+                ocuRef.child(toUser?.uid.toString()).child("Ringing").child(NguoiGoi.uid)
+                    .removeValue().addOnCompleteListener {
+                        startActivity(Intent(this, VideoChatActivity::class.java))
                     }
-                }
-                else{
-                    startActivity(Intent(this@Outcoming, MainActivity::class.java))
-                    finish()
-                }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-
-        })
-
-        //Reciveder
-        ocuRef.child(senderUid).child("ringing").addListenerForSingleValueEvent(object : ValueEventListener{
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.exists() && snapshot.hasChild("ringing")) {
-                    callingUid = snapshot.child("ringing").value.toString()
-
-                    ocuRef.child(ringingUid).child("calling").removeValue().addOnCompleteListener {
-                        if (it.isSuccessful){
-                            ocuRef.child(senderUid).child("ringing").removeValue().addOnCompleteListener {
-                                startActivity(Intent(this@Outcoming, IncomingCall::class.java))
-                                finish()
-                            }
-                        }
-                    }
-                }
-                else{
-                    startActivity(Intent(this@Outcoming, MainActivity::class.java))
-                    finish()
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-
-        })
     }
 
 }

@@ -16,6 +16,7 @@ import com.example.firebaseappchat.registerlogin.LoginActivity
 import com.example.firebaseappchat.NewMessActivity
 import com.example.firebaseappchat.R
 import com.example.firebaseappchat.SearchUser.SearchUserActivity
+import com.example.firebaseappchat.VideoCall.NhanGoiActivity
 import com.example.firebaseappchat.VideoCall.VideoChatActivity
 import com.example.firebaseappchat.databinding.ActivityMainBinding
 import com.example.firebaseappchat.registerlogin.SignUpActivity
@@ -34,6 +35,32 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
     companion object {
         var currentUser: SignUpActivity.getUser? = null
+    }
+
+    override fun onStart() {
+        super.onStart()
+        CheckRinging()
+    }
+
+    private fun CheckRinging() {
+        val uid = FirebaseAuth.getInstance().uid
+        FirebaseDatabase.getInstance().getReference("user-call")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.child(uid.toString()).hasChild("Ringing")) {
+                        val uidCall = snapshot.child(uid.toString()).child("Ringing")
+                            .child("uidCall").value.toString()
+                        Log.d("TESTTTTTTTTTTTT",uidCall)
+                        val intent = Intent(this@MainActivity, NhanGoiActivity::class.java)
+                        intent.putExtra("uidCall", uidCall)
+                        startActivity(intent)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+            })
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -68,29 +95,29 @@ class MainActivity : AppCompatActivity() {
         }
         val appSettingPrefs: SharedPreferences = getSharedPreferences("AppSettingPref", 0)
         val sharedPrefsEdit: SharedPreferences.Editor = appSettingPrefs.edit()
-        val isNightModeOn: Boolean = appSettingPrefs.getBoolean("Night Mode",false)
+        val isNightModeOn: Boolean = appSettingPrefs.getBoolean("Night Mode", false)
 
-        if(isNightModeOn){
+        if (isNightModeOn) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
-        btnDarkMode.setOnCheckedChangeListener{ compoundButton: CompoundButton, b: Boolean ->
-            if(btnDarkMode.isChecked){
+        btnDarkMode.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
+            if (btnDarkMode.isChecked) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                 sharedPrefsEdit.putBoolean("Night Mode", true)
                 sharedPrefsEdit.apply()
-                Toast.makeText(this,"Chuyển Thành Công",Toast.LENGTH_LONG).show()
-            }
-            else {
+                Toast.makeText(this, "Chuyển Thành Công", Toast.LENGTH_LONG).show()
+            } else {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                 sharedPrefsEdit.putBoolean("Night Mode", false)
                 sharedPrefsEdit.apply()
-                Toast.makeText(this,"Chuyển Thành Công",Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Chuyển Thành Công", Toast.LENGTH_LONG).show()
             }
         }
     }
+
     private fun fecthCurrentUser() {
         val uid = FirebaseAuth.getInstance().uid
         val ref = FirebaseDatabase.getInstance().getReference("/user/$uid")

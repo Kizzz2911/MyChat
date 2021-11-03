@@ -6,11 +6,16 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import com.example.firebaseappchat.VideoCall.NhanGoiActivity
+import com.example.firebaseappchat.VideoCall.Outcoming
 import com.example.firebaseappchat.databinding.ActivityLoginBinding
 import com.example.firebaseappchat.messages.MainActivity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import java.lang.Exception
 
@@ -90,8 +95,9 @@ class LoginActivity : AppCompatActivity() {
                     TOKEN()
                     Toast.makeText(this, "Đăng Nhập Thành Công", Toast.LENGTH_SHORT).show()
                     Loading.dismiss()
-                    val intent = Intent(this, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                    intent.flags =
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(intent)
                 } else {//Đăng Nhập Thất Bại.
                     Loading.dismiss()
@@ -107,6 +113,4 @@ class LoginActivity : AppCompatActivity() {
         }
 
     }
-
-
 }
