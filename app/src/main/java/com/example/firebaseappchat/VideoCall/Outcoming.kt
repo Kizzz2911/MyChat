@@ -45,10 +45,6 @@ class Outcoming : AppCompatActivity() {
 
     private lateinit var NguoiGoi: FirebaseUser
 
-    private lateinit var callingUid: String
-
-    private lateinit var ringingUid: String
-
     private lateinit var checker: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +63,7 @@ class Outcoming : AppCompatActivity() {
 
 
         checker = "clicked"
-
+        Check()
         if (toUser != null) {
             username.text = toUser!!.name
             Picasso.get().load(toUser!!.Urlphoto).into(avatar)
@@ -78,6 +74,23 @@ class Outcoming : AppCompatActivity() {
             checker = "clicked"
             cancelCalling()
         }
+    }
+
+    private fun Check() {
+        FirebaseDatabase.getInstance().getReference("user-call")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val uid = FirebaseAuth.getInstance().uid
+                    if (!snapshot.child(uid.toString()).hasChild("Calling")) {
+                        mediaPlayer.stop()
+                        startActivity(Intent(this@Outcoming, VideoChatActivity::class.java))
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+            })
     }
 
     override fun onStart() {
@@ -93,7 +106,8 @@ class Outcoming : AppCompatActivity() {
         //Call Event
         ocuRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                ocuRef.child(NguoiGoi.uid).child("Calling").child("uidNghe").setValue(toUser?.uid.toString())
+                ocuRef.child(NguoiGoi.uid).child("Calling").child("uidNghe")
+                    .setValue(toUser?.uid.toString())
                 ocuRef.child(NguoiGoi.uid)
                     .updateChildren(callingInfo)
                     .addOnCompleteListener {
@@ -102,12 +116,14 @@ class Outcoming : AppCompatActivity() {
                                 "name" to toUser?.name.toString(),
                                 "uid" to toUser?.uid.toString()
                             )
-                            ocuRef.child(toUser!!.uid).child("Ringing").child("uidCall").setValue(NguoiGoi.uid)
+                            ocuRef.child(toUser!!.uid).child("Ringing").child("uidCall")
+                                .setValue(NguoiGoi.uid)
                             ocuRef.child(toUser!!.uid)
                                 .updateChildren(ringingInfo)
                         }
                     }
             }
+
             override fun onCancelled(error: DatabaseError) {}
         })
     }
