@@ -63,7 +63,6 @@ class Outcoming : AppCompatActivity() {
 
 
         checker = "clicked"
-        Check()
         if (toUser != null) {
             username.text = toUser!!.name
             Picasso.get().load(toUser!!.Urlphoto).into(avatar)
@@ -75,24 +74,6 @@ class Outcoming : AppCompatActivity() {
             cancelCalling()
         }
     }
-
-    private fun Check() {
-        FirebaseDatabase.getInstance().getReference("user-call")
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val uid = FirebaseAuth.getInstance().uid
-                    if (!snapshot.child(uid.toString()).hasChild("Calling")) {
-                        mediaPlayer.stop()
-                        startActivity(Intent(this@Outcoming, VideoChatActivity::class.java))
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    TODO("Not yet implemented")
-                }
-            })
-    }
-
     override fun onStart() {
         super.onStart()
 
