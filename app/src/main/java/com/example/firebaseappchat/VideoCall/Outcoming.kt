@@ -74,6 +74,7 @@ class Outcoming : AppCompatActivity() {
             cancelCalling()
         }
     }
+
     override fun onStart() {
         super.onStart()
 
@@ -112,10 +113,10 @@ class Outcoming : AppCompatActivity() {
 
     private fun cancelCalling() {
         mediaPlayer.stop()
-        ocuRef.child(NguoiGoi.uid).child("Calling").child(toUser?.uid.toString()).removeValue()
+        ocuRef.child(NguoiGoi.uid).child("Calling").removeValue()
             .addOnCompleteListener {
-                ocuRef.child(toUser?.uid.toString()).child("Ringing").child(NguoiGoi.uid)
-                    .removeValue().addOnCompleteListener {
+                ocuRef.child(toUser?.uid.toString()).child("Ringing").removeValue()
+                    .addOnCompleteListener {
                         startActivity(Intent(this, VideoChatActivity::class.java))
                     }
             }

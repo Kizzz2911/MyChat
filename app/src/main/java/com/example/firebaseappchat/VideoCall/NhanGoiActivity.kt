@@ -4,6 +4,7 @@ import android.content.Intent
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import com.example.firebaseappchat.R
@@ -31,18 +32,34 @@ class NhanGoiActivity : AppCompatActivity() {
         val NguoiGoi = intent.getStringExtra("uidCall").toString()
 
         Load()
+        CheckRinging()
         btn_Tuchoi.setOnClickListener {
             mediaPlayer.stop()
             ocuRef.child(NguoiGoi).child("Calling").removeValue()
                 .addOnCompleteListener {
                     ocuRef.child(NguoiNhan.uid).child("Ringing").removeValue()
-                        .addOnCompleteListener {
-                            startActivity(Intent(this, MainActivity::class.java))
-                        }
                 }
         }
     }
+    private fun CheckRinging() {
+        val uid = FirebaseAuth.getInstance().uid
+        FirebaseDatabase.getInstance().getReference("user-call")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (!snapshot.child(uid.toString()).hasChild("Ringing")) {
+                        val uidCall = snapshot.child(uid.toString()).child("Ringing")
+                            .child("uidCall").value.toString()
+                        Log.d("TESTTTTTTTTTTTT",uidCall)
+                        val intent = Intent(this@NhanGoiActivity, MainActivity::class.java)
+                        startActivity(intent)
+                    }
+                }
 
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+            })
+    }
     private fun Load() {
         FirebaseDatabase.getInstance().getReference("user").addValueEventListener(object :ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
